@@ -6,6 +6,7 @@ using System.Data.Common;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Azure.DataApiBuilder.Config.DatabasePrimitives;
 using Azure.DataApiBuilder.Config.ObjectModel;
 using Azure.DataApiBuilder.Core.Configurations;
@@ -54,6 +55,14 @@ namespace Azure.DataApiBuilder.Core.Services
         /// </summary>
         public override Type SqlToCLRType(string sqlType)
         {
+            // Handle vector type before calling base implementation
+            if (sqlType.StartsWith("vector", StringComparison.OrdinalIgnoreCase))
+            {
+                // Extract dimensions if needed: vector(1536) -> 1536
+                // Return appropriate .NET type
+                return typeof(float[]); // or your custom Vector type
+            }
+
             return TypeHelper.GetSystemTypeFromSqlDbType(sqlType);
         }
 
@@ -99,6 +108,8 @@ namespace Azure.DataApiBuilder.Core.Services
             foreach (DataRow columnInfo in allColumnsInTable.Rows)
             {
                 string columnName = (string)columnInfo["COLUMN_NAME"];
+                string sqlDbTypeName = (string)columnInfo["DATA_TYPE"];
+
                 bool hasDefault =
                     Type.GetTypeCode(columnInfo["COLUMN_DEFAULT"].GetType()) != TypeCode.DBNull;
                 if (sourceDefinition.Columns.TryGetValue(columnName, out ColumnDefinition? columnDefinition))
@@ -112,8 +123,15 @@ namespace Azure.DataApiBuilder.Core.Services
 
                     columnDefinition.DbType = TypeHelper.GetDbTypeFromSystemType(columnDefinition.SystemType);
 
-                    string sqlDbTypeName = (string)columnInfo["DATA_TYPE"];
-                    if (Enum.TryParse(sqlDbTypeName, ignoreCase: true, out SqlDbType sqlDbType))
+                    // Handle Vector type separately
+                    if (sqlDbTypeName.StartsWith("vector", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Vector types don't map to standard SqlDbType enum
+                        columnDefinition.DbType = DbType.Binary; // or DbType.Object
+                        // Store vector dimensions in metadata if needed
+                        columnDefinition.VectorDimensions = ExtractVectorDimensions(sqlDbTypeName);
+                    }
+                    else if (Enum.TryParse(sqlDbTypeName, ignoreCase: true, out SqlDbType sqlDbType))
                     {
                         // The DbType enum in .NET does not distinguish between VarChar and NVarChar. Both are mapped to DbType.String.
                         // So to keep track of the underlying sqlDbType, we store it in the columnDefinition.
@@ -282,6 +300,21 @@ namespace Azure.DataApiBuilder.Core.Services
                 dbType = 0;
                 return false;
             }
+        }
+
+        // Add helper method
+        private static int ExtractVectorDimensions(string vectorType)
+        {
+            // Extract dimensions from "vector(1536)" -> 1536
+            Match match = System.Text.RegularExpressions.Regex.Match(vectorType, @"vector\((\d+)\)", 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int dimensions))
+            {
+                return dimensions;
+            }
+            
+            return 0; // or throw exception for invalid format
         }
     }
 }

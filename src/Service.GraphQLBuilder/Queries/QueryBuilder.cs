@@ -31,11 +31,21 @@ namespace Azure.DataApiBuilder.Service.GraphQLBuilder.Queries
         public const string GROUP_BY_AGGREGATE_FIELD_DISTINCT_NAME = "distinct";
         public const string GROUP_BY_AGGREGATE_FIELD_HAVING_NAME = "having";
 
+        // Add constant for vector field operations
+        public const string VECTOR_SIMILARITY_FIELD_NAME = "vectorSimilarity";
+        public const string VECTOR_DISTANCE_ARGUMENT_NAME = "vectorDistance";
+
         // Define the enabled database types for aggregation
         public static readonly HashSet<DatabaseType> AggregationEnabledDatabaseTypes = new()
         {
             DatabaseType.MSSQL,
             DatabaseType.DWSQL,
+        };
+
+        // Add to AggregationEnabledDatabaseTypes if vector operations are considered aggregations
+        public static readonly HashSet<DatabaseType> VectorEnabledDatabaseTypes = new()
+        {
+            DatabaseType.MSSQL, // SQL Server 2025+
         };
 
         /// <summary>

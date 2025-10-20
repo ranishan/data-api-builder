@@ -329,5 +329,31 @@ namespace Azure.DataApiBuilder.Core.Services
                 (kind is SyntaxKind.StringValue) ||
                 (kind is SyntaxKind.NullValue);
         }
+
+        /// <summary>
+        /// Converts the string representation of a SQL Server vector type to the corresponding .NET Framework type.
+        /// Vectors can be represented as arrays of bytes, floats, doubles, or a custom type.
+        /// </summary>
+        /// <param name="sqlDbTypeName">The string representation of the SQL Server vector type.</param>
+        /// <param name="dimensions">The number of dimensions in the vector (for future use).</param>
+        /// <returns>The .NET Framework type corresponding to the SQL Server vector type.</returns>
+        /// <exception cref="DataApiBuilderException">Thrown when the vector type is unsupported.</exception>
+        public static Type GetSystemTypeFromSqlDbVectorType(string sqlDbTypeName, int dimensions)
+        {
+            // Parse vector type like "VECTOR(1536)"
+            if (sqlDbTypeName.StartsWith("vector", StringComparison.OrdinalIgnoreCase))
+            {
+                // Return appropriate .NET type for vector representation
+                // Option 1: Use float[] or double[]
+                // Option 2: Create custom Vector class
+                // Option 3: Use byte[] for raw storage
+                return typeof(float[]); // or typeof(Vector) if you create a custom type
+            }
+
+            throw new DataApiBuilderException(
+                message: $"Unsupported vector type: {sqlDbTypeName}",
+                statusCode: HttpStatusCode.ServiceUnavailable,
+                subStatusCode: DataApiBuilderException.SubStatusCodes.UnexpectedError);
+        }
     }
 }

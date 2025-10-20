@@ -264,6 +264,15 @@ public class ColumnDefinition
     public bool IsNullable { get; set; }
     public bool IsReadOnly { get; set; }
     public object? DefaultValue { get; set; }
+    /// <summary>
+    /// For Vector columns, stores the dimensionality (e.g., 1536 for vector(1536))
+    /// </summary>
+    public int? VectorDimensions { get; set; }
+
+    /// <summary>
+    /// Indicates if this column is a vector type
+    /// </summary>
+    public bool IsVectorType => VectorDimensions.HasValue && VectorDimensions.Value > 0;
 
     public ColumnDefinition() { }
 
