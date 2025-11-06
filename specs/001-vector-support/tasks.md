@@ -61,17 +61,24 @@ Paths are based on existing Data API Builder multi-project structure:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T011 [P] [US1] Create VectorOmissionTests.cs in src/Service.Tests/SqlTests/ with [TestCategory("MsSql")] attribute for vector omission configuration validation
-- [ ] T012 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_GraphQL
-- [ ] T013 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_REST
-- [ ] T014 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Mutation_On_NonVector_Fields_Succeeds_With_Omitted_Vectors
-- [ ] T015 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Table_Without_Omit_Config_Returns_Error_When_Vectors_Present
+- [X] T011 [P] [US1] Create VectorOmissionTests.cs in src/Service.Tests/SqlTests/ with [TestCategory("MsSql")] attribute for vector omission configuration validation
+- [X] T012 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_GraphQL
+- [X] T013 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_REST
+- [X] T014 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Mutation_On_NonVector_Fields_Succeeds_With_Omitted_Vectors
+- [X] T015 [P] [US1] Add integration test in VectorOmissionTests.cs: Test_Table_Without_Omit_Config_Returns_Error_When_Vectors_Present
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Extend MsSqlMetadataProvider.SqlToCLRType() method in src/Core/Services/MetadataProviders/MsSqlMetadataProvider.cs to detect vector type and return typeof(float[]) for vector columns
-- [ ] T017 [US1] Update MsSqlMetadataProvider.PopulateColumnDefinitionWithHasDefaultAndDbType() in src/Core/Services/MetadataProviders/MsSqlMetadataProvider.cs to extract vector dimensions using SqlVectorTypeHelper
-- [ ] T018 [US1] Modify MsSqlQueryBuilder schema introspection query in src/Core/Resolvers/MsSqlQueryBuilder.cs to detect VECTOR type using TYPE_NAME(system_type_id)
+- [X] T016 [US1] Extend MsSqlMetadataProvider.SqlToCLRType() method in src/Core/Services/MetadataProviders/MsSqlMetadataProvider.cs to detect vector type and return typeof(float[]) for vector columns
+- [X] T017 [US1] Update MsSqlMetadataProvider.PopulateColumnDefinitionWithHasDefaultAndDbType() in src/Core/Services/MetadataProviders/MsSqlMetadataProvider.cs to extract vector dimensions using SqlVectorTypeHelper
+#### User Story 1 Implementation (P1 - Core)
+- [X] **T016**: Modify `MsSqlMetadataProvider.SqlToCLRType()` to detect VECTOR types → return `typeof(float[])`
+- [X] **T017**: Modify `MsSqlMetadataProvider.PopulateColumnDefinitionWithHasDefaultAndDbType()` to extract dimension from "vector(N)" → set `VectorDimensions`
+- [X] **T018**: Modify `MsSqlQueryBuilder.BuildStoredProcedureResultDetailsQuery()` to use `TYPE_NAME(system_type_id)` for introspection (already correct)
+- [X] **T019**: Modify `GraphQLSchemaCreator` to exclude vector columns when `entity.OmitVectorColumns == true`
+- [X] **T020**: Modify REST API serialization (`AuthorizationResolver`) to exclude vector columns when `entity.OmitVectorColumns == true`
+- [X] **T021**: Add configuration validation ensuring `omit-vector-columns` boolean property (handled by JSON schema + Entity class)
+- [X] **T022**: Add error handling when non-omitted VECTOR columns encountered → throw `DataApiBuilderException`
 - [ ] T019 [US1] Update GraphQLSchemaCreator in src/Service/GraphQLSchemaCreator.cs to exclude vector columns from schema when entity.OmitVectorColumns is true
 - [ ] T020 [US1] Update REST API response serialization in src/Service/ to exclude vector columns when entity.OmitVectorColumns is true
 - [ ] T021 [US1] Add configuration validation in src/Config/ to validate omit-vector-columns property and provide clear error messages for invalid configurations

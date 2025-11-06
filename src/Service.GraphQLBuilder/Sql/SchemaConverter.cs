@@ -176,6 +176,12 @@ namespace Azure.DataApiBuilder.Service.GraphQLBuilder.Sql
             SourceDefinition sourceDefinition = databaseObject.SourceDefinition;
             foreach ((string columnName, ColumnDefinition column) in sourceDefinition.Columns)
             {
+                // Skip vector columns when entity has omit-vector-columns configured
+                if (configEntity.OmitVectorColumns && column.IsVectorType)
+                {
+                    continue;
+                }
+
                 List<DirectiveNode> directives = new();
                 if (sourceDefinition.PrimaryKey.Contains(columnName))
                 {

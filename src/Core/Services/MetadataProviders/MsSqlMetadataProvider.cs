@@ -6,13 +6,13 @@ using System.Data.Common;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 using Azure.DataApiBuilder.Config.DatabasePrimitives;
 using Azure.DataApiBuilder.Config.ObjectModel;
 using Azure.DataApiBuilder.Core.Configurations;
 using Azure.DataApiBuilder.Core.Models;
 using Azure.DataApiBuilder.Core.Resolvers;
 using Azure.DataApiBuilder.Core.Resolvers.Factories;
+using Azure.DataApiBuilder.Core.Services.MetadataProviders;
 using Azure.DataApiBuilder.Service.Exceptions;
 using Azure.DataApiBuilder.Service.GraphQLBuilder;
 using Microsoft.Data.SqlClient;
@@ -55,12 +55,10 @@ namespace Azure.DataApiBuilder.Core.Services
         /// </summary>
         public override Type SqlToCLRType(string sqlType)
         {
-            // Handle vector type before calling base implementation
-            if (sqlType.StartsWith("vector", StringComparison.OrdinalIgnoreCase))
+            // Handle VECTOR type: SQL Server 2025 VECTOR(N) maps to float[] in CLR
+            if (SqlVectorTypeHelper.IsVectorType(sqlType))
             {
-                // Extract dimensions if needed: vector(1536) -> 1536
-                // Return appropriate .NET type
-                return typeof(float[]); // or your custom Vector type
+                return typeof(float[]);
             }
 
             return TypeHelper.GetSystemTypeFromSqlDbType(sqlType);
@@ -123,13 +121,12 @@ namespace Azure.DataApiBuilder.Core.Services
 
                     columnDefinition.DbType = TypeHelper.GetDbTypeFromSystemType(columnDefinition.SystemType);
 
-                    // Handle Vector type separately
-                    if (sqlDbTypeName.StartsWith("vector", StringComparison.OrdinalIgnoreCase))
+                    // Handle VECTOR type: extract dimensions and set appropriate DbType
+                    if (SqlVectorTypeHelper.IsVectorType(sqlDbTypeName))
                     {
-                        // Vector types don't map to standard SqlDbType enum
-                        columnDefinition.DbType = DbType.Binary; // or DbType.Object
-                        // Store vector dimensions in metadata if needed
-                        columnDefinition.VectorDimensions = ExtractVectorDimensions(sqlDbTypeName);
+                        // VECTOR columns are returned as byte[] from SQL Server (binary representation)
+                        columnDefinition.DbType = DbType.Binary;
+                        columnDefinition.VectorDimensions = SqlVectorTypeHelper.ExtractVectorDimension(sqlDbTypeName);
                     }
                     else if (Enum.TryParse(sqlDbTypeName, ignoreCase: true, out SqlDbType sqlDbType))
                     {
@@ -300,21 +297,6 @@ namespace Azure.DataApiBuilder.Core.Services
                 dbType = 0;
                 return false;
             }
-        }
-
-        // Add helper method
-        private static int ExtractVectorDimensions(string vectorType)
-        {
-            // Extract dimensions from "vector(1536)" -> 1536
-            Match match = System.Text.RegularExpressions.Regex.Match(vectorType, @"vector\((\d+)\)", 
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            
-            if (match.Success && int.TryParse(match.Groups[1].Value, out int dimensions))
-            {
-                return dimensions;
-            }
-            
-            return 0; // or throw exception for invalid format
         }
     }
 }

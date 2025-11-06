@@ -45,10 +45,10 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
         /// <code>Spec: </code> FR-005: System excludes VECTOR columns from GraphQL schema when omit-vector-columns is true
         /// </summary>
         [TestMethod]
-        public async Task Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_GraphQL()
+        public Task Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_GraphQL()
         {
             // Arrange
-            string graphQLQuery = @"
+            _ = @"
                 query {
                     product_by_pk(id: 1) {
                         id
@@ -63,6 +63,7 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
             // Expected: Query succeeds, returns non-vector fields
             // Actual (before implementation): GraphQL schema generation fails or vector fields appear in schema
             Assert.Fail("TEST NOT IMPLEMENTED: Implementation pending for T016-T019");
+            return Task.CompletedTask;
 
             // TODO after implementation:
             // JsonElement response = await ExecuteGraphQLRequestAsync(graphQLQuery, "product_by_pk", isAuthenticated: false);
@@ -84,16 +85,17 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
         /// <code>Spec: </code> FR-006: System excludes VECTOR columns from REST responses when omit-vector-columns is true
         /// </summary>
         [TestMethod]
-        public async Task Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_REST()
+        public Task Test_Table_With_Omitted_Vectors_Returns_NonVector_Fields_Via_REST()
         {
             // Arrange
-            string restPath = "/api/Product/id/1";
+            _ = "/api/Product/id/1";
 
             // Act
             // This test should FAIL until implementation is complete
             // Expected: GET succeeds, returns non-vector fields only
             // Actual (before implementation): REST serialization fails or vector fields appear in response
             Assert.Fail("TEST NOT IMPLEMENTED: Implementation pending for T016-T020");
+            return Task.CompletedTask;
 
             // TODO after implementation:
             // JsonElement response = await ExecuteRestApiRequestAsync(restPath, HttpMethod.Get, isAuthenticated: false);
@@ -115,10 +117,10 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
         /// <code>Spec: </code> FR-007: Users can perform mutations on non-VECTOR fields when omit-vector-columns is true
         /// </summary>
         [TestMethod]
-        public async Task Test_Mutation_On_NonVector_Fields_Succeeds_With_Omitted_Vectors()
+        public Task Test_Mutation_On_NonVector_Fields_Succeeds_With_Omitted_Vectors()
         {
             // Arrange
-            string graphQLMutation = @"
+            _ = @"
                 mutation {
                     createProduct(item: {
                         name: ""Test Product""
@@ -136,6 +138,7 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
             // Expected: Mutation succeeds, inserts row with NULL embedding
             // Actual (before implementation): Mutation fails due to vector column presence
             Assert.Fail("TEST NOT IMPLEMENTED: Implementation pending for T016-T022");
+            return Task.CompletedTask;
 
             // TODO after implementation:
             // JsonElement response = await ExecuteGraphQLRequestAsync(graphQLMutation, "createProduct", isAuthenticated: false);
@@ -161,7 +164,7 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
         /// <code>Spec: </code> FR-008: System provides clear error when VECTOR columns encountered without omit configuration
         /// </summary>
         [TestMethod]
-        public async Task Test_Table_Without_Omit_Config_Returns_Error_When_Vectors_Present()
+        public Task Test_Table_Without_Omit_Config_Returns_Error_When_Vectors_Present()
         {
             // Arrange
             // Table with VECTOR columns but omit-vector-columns NOT configured (defaults to false)
@@ -171,6 +174,7 @@ namespace Azure.DataApiBuilder.Service.Tests.SqlTests
             // Expected: Startup or query fails with clear error message about vector support
             // Actual (before implementation): Generic error or incorrect behavior
             Assert.Fail("TEST NOT IMPLEMENTED: Implementation pending for T021-T022");
+            return Task.CompletedTask;
 
             // TODO after implementation:
             // Expected error patterns (either at startup or query time):

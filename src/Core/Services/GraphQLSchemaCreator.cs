@@ -215,6 +215,12 @@ namespace Azure.DataApiBuilder.Core.Services
                     bool isStoredProcedure = entity.Source.Type is EntitySourceType.StoredProcedure;
                     foreach (string column in sourceDefinition.Columns.Keys)
                     {
+                        // Skip vector columns when entity has omit-vector-columns configured
+                        if (entity.OmitVectorColumns && sourceDefinition.Columns[column].IsVectorType)
+                        {
+                            continue;
+                        }
+
                         EntityActionOperation operation = isStoredProcedure ? EntityActionOperation.Execute : EntityActionOperation.Read;
                         IEnumerable<string> roles = _authorizationResolver.GetRolesForField(entityName, field: column, operation: operation);
                         if (!rolesAllowedForFields.TryAdd(key: column, value: roles))

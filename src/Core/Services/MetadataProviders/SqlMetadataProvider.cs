@@ -1332,6 +1332,12 @@ namespace Azure.DataApiBuilder.Core.Services
                 sourceDefinition,
                 columnsInTable);
 
+            // Validate VECTOR column configuration for SQL Server
+            if (entity is not null && GetDatabaseType() is DatabaseType.MSSQL or DatabaseType.DWSQL)
+            {
+                ValidateVectorColumnConfiguration(entityName, entity, sourceDefinition);
+            }
+
             if (entity is not null && entity.Source.Type is EntitySourceType.Table)
             {
                 // For MySql, database name is equivalent to schema name.
@@ -1375,6 +1381,51 @@ namespace Azure.DataApiBuilder.Core.Services
                         columnDefinition.IsReadOnly = true;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Validates that VECTOR columns are properly configured with the omit-vector-columns setting.
+        /// When VECTOR columns are present in a table/view and omit-vector-columns is not set to true,
+        /// throws a DataApiBuilderException with a helpful message suggesting the configuration option.
+        /// This validation only applies to SQL Server (MSSQL/DWSQL) databases.
+        /// </summary>
+        /// <param name="entityName">Name of the entity being validated.</param>
+        /// <param name="entity">Entity configuration object.</param>
+        /// <param name="sourceDefinition">Source definition containing column metadata.</param>
+        /// <exception cref="DataApiBuilderException">Thrown when VECTOR columns are found without proper configuration.</exception>
+        private static void ValidateVectorColumnConfiguration(
+            string entityName,
+            Entity entity,
+            SourceDefinition sourceDefinition)
+        {
+            // If omit-vector-columns is true, no validation needed (vectors are intentionally omitted)
+            if (entity.OmitVectorColumns)
+            {
+                return;
+            }
+
+            // Check if any VECTOR columns exist
+            List<string> vectorColumns = new();
+            foreach ((string columnName, ColumnDefinition columnDef) in sourceDefinition.Columns)
+            {
+                if (columnDef.IsVectorType)
+                {
+                    vectorColumns.Add(columnName);
+                }
+            }
+
+            // If VECTOR columns found and not configured to omit, throw error
+            if (vectorColumns.Count > 0)
+            {
+                string columnList = string.Join(", ", vectorColumns);
+                throw new DataApiBuilderException(
+                    message: $"Entity '{entityName}' contains VECTOR column(s): {columnList}. " +
+                             $"VECTOR columns are not currently supported for direct GraphQL/REST access. " +
+                             $"To enable CRUD operations on this entity, set \"omit-vector-columns\": true in the entity configuration. " +
+                             $"This will exclude VECTOR columns from the API surface while allowing access to other columns.",
+                    statusCode: HttpStatusCode.ServiceUnavailable,
+                    subStatusCode: DataApiBuilderException.SubStatusCodes.ErrorInInitialization);
             }
         }
 

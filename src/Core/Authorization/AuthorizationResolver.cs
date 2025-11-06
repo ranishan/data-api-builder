@@ -343,7 +343,7 @@ public class AuthorizationResolver : IAuthorizationResolver
 
                     // Populate allowed exposed columns for each entity/role/operation combination during startup,
                     // so that it doesn't need to be evaluated per request.
-                    PopulateAllowedExposedColumns(operationToColumn.AllowedExposedColumns, entityName, allowedColumns, metadataProvider);
+                    PopulateAllowedExposedColumns(operationToColumn.AllowedExposedColumns, entityName, allowedColumns, metadataProvider, entity);
 
                     IEnumerable<EntityActionOperation> operations = GetAllOperationsForObjectType(operation, entity.Source.Type);
                     foreach (EntityActionOperation crudOperation in operations)
@@ -453,14 +453,27 @@ public class AuthorizationResolver : IAuthorizationResolver
     /// <param name="allowedExposedColumns">Set of fields exposed to user.</param>
     /// <param name="entityName">Entity from request</param>
     /// <param name="allowedDBColumns">Set of allowed backing field names.</param>
+    /// <param name="metadataProvider">Metadata provider to resolve column names and definitions.</param>
+    /// <param name="entity">Entity configuration containing omit-vector-columns setting.</param>
     private static void PopulateAllowedExposedColumns(
         HashSet<string> allowedExposedColumns,
         string entityName,
         HashSet<string> allowedDBColumns,
-        ISqlMetadataProvider metadataProvider)
+        ISqlMetadataProvider metadataProvider,
+        Entity entity)
     {
+        SourceDefinition sourceDefinition = metadataProvider.GetSourceDefinition(entityName);
+        
         foreach (string dbColumn in allowedDBColumns)
         {
+            // Skip vector columns when entity has omit-vector-columns configured
+            if (entity.OmitVectorColumns && 
+                sourceDefinition.Columns.TryGetValue(dbColumn, out ColumnDefinition? columnDef) && 
+                columnDef.IsVectorType)
+            {
+                continue;
+            }
+
             if (metadataProvider.TryGetExposedColumnName(entityName, backingFieldName: dbColumn, out string? exposedName))
             {
                 if (exposedName is not null)
