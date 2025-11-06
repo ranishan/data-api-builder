@@ -27,11 +27,11 @@ Paths are based on existing Data API Builder multi-project structure:
 
 **Purpose**: Project initialization and research completion
 
-- [ ] T001 Complete Phase 0 research document (research.md) answering 5 critical questions about SQL Server VECTOR introspection, ADO.NET wire format, GraphQL type mapping, configuration schema, and validation patterns
-- [ ] T002 [P] Create Phase 1 data model document (data-model.md) defining VECTOR Column Metadata, Vector Data, and Entity Configuration entities
-- [ ] T003 [P] Create Phase 1 contracts documentation in contracts/ directory with GraphQL schema examples and REST API samples
-- [ ] T004 [P] Create Phase 1 quickstart guide (quickstart.md) with configuration examples and usage scenarios
-- [ ] T005 Update agent context with technology choices using .specify/scripts/powershell/update-agent-context.ps1
+- [X] T001 Complete Phase 0 research document (research.md) answering 5 critical questions about SQL Server VECTOR introspection, ADO.NET wire format, GraphQL type mapping, configuration schema, and validation patterns
+- [X] T002 [P] Create Phase 1 data model document (data-model.md) defining VECTOR Column Metadata, Vector Data, and Entity Configuration entities
+- [X] T003 [P] Create Phase 1 contracts documentation in contracts/ directory with GraphQL schema examples and REST API samples
+- [X] T004 [P] Create Phase 1 quickstart guide (quickstart.md) with configuration examples and usage scenarios
+- [X] T005 Update agent context with technology choices using .specify/scripts/powershell/update-agent-context.ps1
 
 ---
 
@@ -41,11 +41,11 @@ Paths are based on existing Data API Builder multi-project structure:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Add VectorDimensions nullable integer property to ColumnDefinition class in src/Core/Models/ColumnDefinition.cs
-- [ ] T007 Add OmitVectorColumns boolean property to Entity class in src/Config/ObjectModel/Entity.cs
-- [ ] T008 Update JSON schema (schemas/dab.draft.schema.json) to include omit-vector-columns configuration property with type boolean and description
-- [ ] T009 [P] Create SqlVectorTypeHelper utility class in src/Core/Services/MetadataProviders/SqlVectorTypeHelper.cs for dimension extraction and format parsing
-- [ ] T010 [P] Add vector type detection constants (type name patterns, dimension limits) to src/Core/Constants/SqlConstants.cs or appropriate constants file
+- [X] T006 Add VectorDimensions nullable integer property to ColumnDefinition class in src/Core/Models/ColumnDefinition.cs
+- [X] T007 Add OmitVectorColumns boolean property to Entity class in src/Config/ObjectModel/Entity.cs
+- [X] T008 Update JSON schema (schemas/dab.draft.schema.json) to include omit-vector-columns configuration property with type boolean and description
+- [X] T009 [P] Create SqlVectorTypeHelper utility class in src/Core/Services/MetadataProviders/SqlVectorTypeHelper.cs for dimension extraction and format parsing
+- [X] T010 [P] Add vector type detection constants (type name patterns, dimension limits) to src/Core/Constants/SqlConstants.cs or appropriate constants file
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

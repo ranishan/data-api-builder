@@ -705,6 +705,11 @@
               "type": "string",
               "description": "Optional description for the entity. Will be surfaced in generated API documentation and GraphQL schema as comments."
             },
+            "omit-vector-columns": {
+              "type": "boolean",
+              "description": "When true, excludes all VECTOR columns from GraphQL schema and REST responses. Enables CRUD operations on tables with vector columns when vector support is not needed. Default: false (vector columns are included).",
+              "default": false
+            },
             "health": {
               "description": "Health check configuration for entity",
               "type": [ "object", "null" ],

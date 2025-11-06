@@ -24,6 +24,7 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <param name="Health">Defines whether to enable comprehensive health check for the entity
 /// and how many rows to return in query and under what threshold-ms.</param>
 /// <param name="Description">Optional description for the entity. Used for API documentation and GraphQL schema comments.</param>
+/// <param name="OmitVectorColumns">When true, excludes all VECTOR columns from API surface. Defaults to false.</param>
 public record Entity
 {
     public const string PROPERTY_PATH = "path";
@@ -39,6 +40,14 @@ public record Entity
 
     public EntityHealthCheckConfig? Health { get; init; }
 
+    /// <summary>
+    /// When true, VECTOR columns are excluded from GraphQL schema and REST responses.
+    /// Enables CRUD operations on tables with vector columns when vector support is not needed.
+    /// Default: false (vector columns are included when present).
+    /// </summary>
+    [JsonPropertyName("omit-vector-columns")]
+    public bool OmitVectorColumns { get; init; } = false;
+
     [JsonIgnore]
     public bool IsLinkingEntity { get; init; }
 
@@ -53,7 +62,8 @@ public record Entity
         EntityCacheOptions? Cache = null,
         bool IsLinkingEntity = false,
         EntityHealthCheckConfig? Health = null,
-        string? Description = null)
+        string? Description = null,
+        bool OmitVectorColumns = false)
     {
         this.Health = Health;
         this.Source = Source;
@@ -65,6 +75,7 @@ public record Entity
         this.Cache = Cache;
         this.IsLinkingEntity = IsLinkingEntity;
         this.Description = Description;
+        this.OmitVectorColumns = OmitVectorColumns;
     }
 
     /// <summary>

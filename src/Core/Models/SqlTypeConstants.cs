@@ -50,4 +50,28 @@ public static class SqlTypeConstants
         { "", false },                    // SqlDbType.Udt and SqlDbType.Structured provided by SQL as empty strings (unsupported)
         { "numeric", true}                // Not present in SqlDbType, however can be returned by sql functions like LAG and should map to decimal.
     };
+
+    /// <summary>
+    /// SQL Server VECTOR type name pattern for type detection.
+    /// VECTOR types are stored as CLR type System.Byte[] (binary data) but require special handling.
+    /// Format: "vector(N)" where N is dimension (1-8000).
+    /// </summary>
+    public const string VECTOR_TYPE_NAME = "vector";
+
+    /// <summary>
+    /// Maximum dimension supported by SQL Server VECTOR type.
+    /// SQL Server 2025 supports VECTOR dimensions from 1 to 8000.
+    /// </summary>
+    public const int MAX_VECTOR_DIMENSION = 8000;
+
+    /// <summary>
+    /// Minimum dimension supported by SQL Server VECTOR type.
+    /// </summary>
+    public const int MIN_VECTOR_DIMENSION = 1;
+
+    /// <summary>
+    /// Size in bytes of a single float element in a VECTOR.
+    /// SQL Server VECTOR uses float32 (single-precision) representation.
+    /// </summary>
+    public const int VECTOR_ELEMENT_SIZE_BYTES = 4;
 }
